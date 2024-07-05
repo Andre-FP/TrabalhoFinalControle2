@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from scipy.signal import lti, cont2discrete, place_poles
 
 
-# Define funções
 def continuous_dynamics(xc, uc, Ac, Bc):
     return Ac @ xc + Bc @ uc
 
@@ -48,9 +47,6 @@ def plot_tempo_discreto(vt, vx, vu):
     plt.grid(True)
     plt.ylabel('u')
 
-
-##### Constantes e inicializações #####
-CASE = 2
 
 # Planta
 Ac = np.array([[0, 1], [0, -2]])
