@@ -123,7 +123,7 @@ Aa, Ba, Bm, Ca = matrizes_aumentadas(A, B, C)
 Aac, Bac, Bmc, Cac = matrizes_aumentadas(Ac, Bc, Cc)
 
 
-Pc = np.array([-2, -3, -5])
+Pc = np.array([-2, -3, -3.3])
 Kac = place_poles(Aac, Bac, Pc).gain_matrix
 Kc = np.expand_dims(Kac[0][:len(A)], axis=0)
 kic = -Kac[0][-1]
