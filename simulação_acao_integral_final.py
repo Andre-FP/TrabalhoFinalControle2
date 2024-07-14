@@ -10,68 +10,139 @@ def continuous_dynamics(xc, uc, Ac, Bc):
 def discrete_dynamics(x, u, A, B):
     return A @ x + B @ u
 
-def plot_tempo_continuo(vt, vx, vxi, vu, vy, vtc, vxc, vxic, vuc, vyc):
+
+
+def plot_i_continuo(fig, vt, vu, vtc, vuc, title):
+    pass
+
+def plot_ii_continuo(fig, vt, vu, vu_hat, vtc, vuc, vuc_hat, title):
+
+    axs = fig.subplots(2, 1, sharex=True)
+
+    fig.suptitle(title)
+
+    axs[0].plot(vt, vu, '*k', linewidth=1)
+    axs[0].plot(vtc, vuc, 'g', linewidth=3)
+    axs[0].grid(True)
+    axs[0].set_ylabel('v')
+
+    axs[1].plot(vt, vu_hat, '*k', linewidth=1)
+    axs[1].plot(vtc, vuc_hat, 'g', linewidth=3)
+    axs[1].grid(True)
+    axs[1].set_ylabel('v_hat')
+
+    plt.tight_layout()
+
+
+def plot_iii_continuo(fig, vt, vy, vy_hat, vtc, vyc, vyc_hat, title):
     
-    plt.subplot(5, 1, 1)
-    plt.plot(vt, vx[:, 0], '*k', linewidth=1)
-    plt.plot(vtc, vxc[:, 0], 'g', linewidth=3)
-    plt.grid(True)
-    plt.ylabel('x1')
+    axs = fig.subplots(2, 1, sharex=True)
+    
+    fig.suptitle(title)
+    
+    axs[0].plot(vt, vy, '*k', linewidth=1)
+    axs[0].plot(vtc, vyc, 'g', linewidth=3)
+    axs[0].grid(True)
+    axs[0].set_ylabel('y')
 
-    plt.subplot(5, 1, 2)
-    plt.plot(vt, vx[:, 1], '*k', linewidth=1)
-    plt.plot(vtc, vxc[:, 1], 'g', linewidth=3)
-    plt.grid(True)
-    plt.ylabel('x2')
+    axs[1].plot(vt, vy_hat, '*k', linewidth=1)
+    axs[1].plot(vtc, vyc_hat, 'g', linewidth=3)
+    axs[1].grid(True)
+    axs[1].set_ylabel('y_hat')
 
-    plt.subplot(5, 1, 3)
-    plt.plot(vt, vxi, '*k', linewidth=1)
-    plt.plot(vtc, vxic, 'g', linewidth=3)
-    plt.grid(True)
-    plt.ylabel('xi')
+    plt.tight_layout()
 
-    plt.subplot(5, 1, 4)
-    plt.plot(vt, vy, '*k', linewidth=1)
-    plt.plot(vtc, vyc, 'g', linewidth=3)
-    plt.grid(True)
-    plt.ylabel('y')
 
-    plt.subplot(5, 1, 5)
-    plt.plot(vt, vu, '*k', linewidth=1)
-    plt.plot(vtc, vuc, 'g', linewidth=3)
-    plt.grid(True)
-    plt.ylabel('u')
+def plot_iv_continuo(fig, vt, vx, vx_hat, vtc, vxc, vxc_hat, title):
+    
+    axs = fig.subplots(4, 1, sharex=True)
+    
+    fig.suptitle(title)
 
-def plot_tempo_discreto(vt, vx, vxi, vu, vy):
-    plt.subplot(5, 1, 1)
-    plt.plot(vt, vx[:, 0], 'om', linewidth=1)
-    plt.grid(True)
-    plt.ylabel('x1')
+    axs[0].plot(vt, vx[:, 0], '*k', linewidth=1, label='Discreto')
+    axs[0].plot(vtc, vxc[:, 0], 'g', linewidth=3, label='Contínuo')
+    axs[0].grid(True)
+    axs[0].set_ylabel('x1')
+    axs[0].legend()
 
-    plt.subplot(5, 1, 2)
-    plt.plot(vt, vx[:, 1], 'om', linewidth=1)
-    plt.grid(True)
-    plt.ylabel('x2')
+    axs[1].plot(vt, vx_hat[:, 0], '*k', linewidth=1)
+    axs[1].plot(vtc, vxc_hat[:, 0], 'g', linewidth=3)
+    axs[1].grid(True)
+    axs[1].set_ylabel('x1_hat')
 
-    plt.subplot(5, 1, 3)
-    plt.plot(vt, vxi, 'om', linewidth=1)
-    plt.grid(True)
-    plt.ylabel('xi')
+    axs[2].plot(vt, vx[:, 1], '*k', linewidth=1)
+    axs[2].plot(vtc, vxc[:, 1], 'g', linewidth=3)
+    axs[2].grid(True)
+    axs[2].set_ylabel('x2')
 
-    plt.subplot(5, 1, 4)
-    plt.plot(vt, vy, 'om', linewidth=1)
-    plt.grid(True)
-    plt.ylabel('y')
+    axs[3].plot(vt, vx_hat[:, 1], '*k', linewidth=1)
+    axs[3].plot(vtc, vxc_hat[:, 1], 'g', linewidth=3)
+    axs[3].grid(True)
+    axs[3].set_ylabel('x2_hat')
 
-    plt.subplot(5, 1, 5)
-    plt.plot(vt, vu, 'om', linewidth=1)
-    plt.grid(True)
-    plt.ylabel('u')
+    plt.tight_layout()
+
+
+def plot_v_continuo(fig, vt, vxi, vtc, vxic, title):
+    
+    axs = fig.subplots(1, 1, sharex=True)
+
+    fig.suptitle(title)
+
+    axs.plot(vt, vxi, '*k', linewidth=1)
+    axs.plot(vtc, vxic, 'g', linewidth=3)
+    axs.grid(True)
+    axs.set_ylabel('xi')
+
+    plt.tight_layout()
+
+
+def plot_tempo_discreto(fig, vt, vx, vxi, vu, vy, title):
+    
+    axs = fig.subplots(5, 1, sharex=True)
+    
+    fig.suptitle(title)
+    
+    axs[0].plot(vt, vx[:, 0], 'om', linewidth=1)
+    axs[0].grid(True)
+    axs[0].set_ylabel('x1')
+
+    axs[1].plot(vt, vx[:, 1], 'om', linewidth=1)
+    axs[1].grid(True)
+    axs[1].set_ylabel('x2')
+
+    axs[2].plot(vt, vxi, 'om', linewidth=1)
+    axs[2].grid(True)
+    axs[2].set_ylabel('xi')
+
+    axs[3].plot(vt, vy, 'om', linewidth=1)
+    axs[3].grid(True)
+    axs[3].set_ylabel('y')
+
+    axs[4].plot(vt, vu, 'om', linewidth=1)
+    axs[4].grid(True)
+    axs[4].set_ylabel('u')
+
+
+a = 1
+b = 1.5
+mi = 1
+
+'''
+item (c)
+
+# Parâmetros do sistema
+a = np.random.uniform(-2, 5)
+b = np.random.uniform(1, 2)
+c = np.random.uniform(3, 5)
+d = -3  # Perturbação constante
+mi = np.random.uniform(0.1, 1.5)
+'''
 
 
 # Planta
-Ac = np.array([[0, 1], [0, -2]])
-Bc = np.array([[0], [2]])
+Ac = np.array([[0, 1], [a/mi, (a*mi - 1)/mi]])
+Bc = np.array([[0], [-a*b/mi]])
 Cc = np.array([[1, 0]])
 sysc = lti(Ac, Bc, Cc, 0)
 intstep = 1e-3
@@ -100,7 +171,7 @@ print("B =\n", B)
 
 print("eig(A) =", np.linalg.eig(A))
 print("eig(Ac) =", np.linalg.eig(Ac))
-sys.exit()
+
 ##### Controlador Ação Integral #####
 
 def matrizes_aumentadas(A, B, C):
@@ -124,7 +195,7 @@ def matrizes_aumentadas(A, B, C):
     return Aa, Ba, Bm, Ca
 
 
-ym = 1
+ym = -10
 
 # Exibir a matriz aumentada Aa
 Aa, Ba, Bm, Ca = matrizes_aumentadas(A, B, C)
@@ -133,10 +204,16 @@ Aa, Ba, Bm, Ca = matrizes_aumentadas(A, B, C)
 Aac, Bac, Bmc, Cac = matrizes_aumentadas(Ac, Bc, Cc)
 
 
-Pc = np.array([-2, -3, -3.3])
+tau = 1.5
+
+Pc = np.array([-tau, -0.411871*tau, -20])
 Kac = place_poles(Aac, Bac, Pc).gain_matrix 
 Kc = np.expand_dims(Kac[0][:len(A)], axis=0)
 kic = -Kac[0][-1]
+
+
+print("Aac - Bac*Kac =\n", Aac - Bac @ Kac)
+print("eig(Aac - Bac*Kac) =", np.linalg.eig(Aac - Bac*Kac))
 
 
 P = np.array([-0.1, 0.5, 0.55])
@@ -285,23 +362,47 @@ vxi = np.array(vxi)
 
 # Plotagem 
 
+# Plot (ii)
+fig2 = plt.figure(2, figsize=(5, 6))
+title = "Entrada v"
+plot_ii_continuo(fig2, vthc, vuhc, vuhc_hat, vtc, vuc, vuc_hat, title)
+
+
+# Plot (iii)
+
+fig3 = plt.figure(3, figsize=(5, 6))
+title = "Saída y"
+plot_iii_continuo(fig3, vthc, vyhc, vyhc_hat, vtc, vyc, vyc_hat, title)
+
+# Plot (iv)
+fig4 = plt.figure(4, figsize=(5, 6))
+title = "Estados da planta e do observador"
+plot_iv_continuo(fig4, vthc, vxhc, vxhc_hat, vtc, vxc, vxc_hat, title)
+
+#Plot (v)
+
+fig5 = plt.figure(5, figsize=(5, 6))
+title = "Estados do integrador"
+plot_v_continuo(fig5, vthc, vxihc, vtc, vxic, title)
+
 # 1 - Tempo contínuo.
-plt.figure(1)
-plt.title("Tempo contínuo com Ação integral.")
-plot_tempo_continuo(vthc, vxhc, vxihc, vuhc, vyhc, vtc, vxc, vxic, vuc, vyc)
 
-plt.figure(2)
-plt.title(f"Tempo contínuo com Ação Integral e Observador. \nPólos observador = {P_observer}")
-plot_tempo_continuo(vthc, vxhc_hat, vxihc, vuhc_hat, vyhc_hat, vtc, vxc_hat, vxic, vuc_hat, vyc_hat)
+'''''''''
+fig1 = plt.figure(1, figsize=(5, 6))
+title = "Tempo contínuo com Ação integral."
+plot_tempo_continuo(fig1, vthc, vxhc, vxihc, vuhc, vyhc, vtc, vxc, vxic, vuc, vyc, title)
 
+fig2 = plt.figure(2, figsize=(5, 6))
+title = f"Tempo contínuo com Ação Integral e Observador. \nPólos observador = {P_observer}"
+plot_tempo_continuo(fig2, vthc, vxhc_hat, vxihc, vuhc_hat, vyhc_hat, vtc, vxc_hat, vxic, vuc_hat, vyc_hat, title)
 
 # 2 - Tempo discreto.
-plt.figure(3)
-plt.title(f"Tempo Discreto com Ação integral")
-plot_tempo_discreto(vt, vx, vxi, vu, vy)
+fig3 = plt.figure(3, figsize=(5, 6))
+title = f"Tempo Discreto com Ação integral"
+plot_tempo_discreto(fig3, vt, vx, vxi, vu, vy, title)
 
-plt.figure(4)
-plt.title(f"Tempo Discreto com Ação Integral e Observador. \nPólos observador = {Pc_observer}")
-plot_tempo_discreto(vt, vx_hat, vxi, vu_hat, vy_hat)
-
+fig4 = plt.figure(4, figsize=(5, 6))
+title = f"Tempo Discreto com Ação Integral e Observador. \nPólos observador = {Pc_observer}"
+plot_tempo_discreto(fig4, vt, vx_hat, vxi, vu_hat, vy_hat, title)
+'''
 plt.show()
