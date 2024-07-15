@@ -211,8 +211,6 @@ a = 1
 b = 1.5
 mi = 1
 
-hs = 1/mi*s + 1
-
 # Planta
 Ac = np.array([[0, 1], [a/mi, (a*mi - 1)/mi]])
 Bc = np.array([[0], [-a*b/mi]])

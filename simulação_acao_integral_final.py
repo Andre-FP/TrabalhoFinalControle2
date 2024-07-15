@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import lti, cont2discrete, place_poles
 import sys
+import math
 
 
 def continuous_dynamics(xc, uc, Ac, Bc):
@@ -11,9 +12,37 @@ def discrete_dynamics(x, u, A, B):
     return A @ x + B @ u
 
 
+def plot_i_continuo(fig, vtc, vuc, vuc_hat, mi, mi_n, hc, title):
+    axs = fig.subplots(2, 1, sharex=True)
 
-def plot_i_continuo(fig, vt, vu, vtc, vuc, title):
-    pass
+    fig.suptitle(title)
+    vjc = []
+    vjc_hat = []
+    vector_tc = []
+    for tc in vtc:
+        jc_partial = 1/mi*math.exp(-1/mi*tc)
+        jc_hat_partial = 1/mi_n*math.exp(-1/mi_n*tc)
+
+        i = 0
+        vector_tc.append(tc)
+        jc_integer_part = 0
+        jc_hat_integer_part = 0
+        for i, tau in enumerate(vector_tc):
+            jc_integer_part += hc*math.exp(tau/mi)*vuc[i]
+            jc_hat_integer_part += hc*math.exp(tau/mi_n)*vuc_hat[i]
+        
+        vjc.append(jc_partial*jc_integer_part)
+        vjc_hat.append(jc_hat_partial*jc_hat_integer_part)
+        
+        
+    axs[0].plot(vtc, vjc, 'g', linewidth=3)
+    axs[0].grid(True)
+    axs[0].set_ylabel('u')
+
+    axs[1].plot(vtc, vjc_hat, 'g', linewidth=3)
+    axs[1].grid(True)
+    axs[1].set_ylabel('u_hat')
+
 
 def plot_ii_continuo(fig, vt, vu, vu_hat, vtc, vuc, vuc_hat, title):
 
@@ -272,8 +301,8 @@ t = tc
 
 
 while t < 10:
-    uhc = -K @ xhc + kic*xic
-    uhc_hat = -K @ xhc_hat + kic*xic
+    uhc = -Kc @ xhc + kic*xic
+    uhc_hat = -Kc @ xhc_hat + kic*xic
 
     u = -K @ x + ki*xi
     u_hat = -K @ x_hat + ki*xi
@@ -361,6 +390,13 @@ vxc_hat = np.array(vxc_hat)
 vxi = np.array(vxi)
 
 # Plotagem 
+mi_n = 5
+#Contínuo
+# Plot (ii)
+fig1 = plt.figure(1, figsize=(5, 6))
+title = "Entrada u"
+plot_i_continuo(fig1, vtc, vuc, vuc_hat, mi, mi_n, hc, title)
+
 
 # Plot (ii)
 fig2 = plt.figure(2, figsize=(5, 6))

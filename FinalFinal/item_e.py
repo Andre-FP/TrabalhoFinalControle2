@@ -14,19 +14,21 @@ def discrete_dynamics(x, u, A, B):
 
 # Plots no tempo contínuo
 
-def plot_i_continuo(fig, vtc, vuc, vuc_hat, mi, mi_n, hc, title):
+def plot_i_continuo(fig, vtc, vuc, vuc_hat, mi, mi_n, hc, title, color='g'):
     axs = fig.subplots(2, 1, sharex=True)
 
     fig.suptitle(title)
     vjc = []
     vjc_hat = []
     vector_tc = []
+    
     for tc in vtc:
         jc_partial = 1/mi*math.exp(-1/mi*tc)
         jc_hat_partial = 1/mi_n*math.exp(-1/mi_n*tc)
 
         i = 0
         vector_tc.append(tc)
+        
         jc_integer_part = 0
         jc_hat_integer_part = 0
         for i, tau in enumerate(vector_tc):
@@ -37,17 +39,14 @@ def plot_i_continuo(fig, vtc, vuc, vuc_hat, mi, mi_n, hc, title):
         vjc_hat.append(jc_hat_partial*jc_hat_integer_part)
         
         
-    axs[0].plot(vtc, vjc, 'g', linewidth=3)
+    axs[0].plot(vtc, vjc, color, linewidth=3)
     axs[0].grid(True)
     axs[0].set_ylabel('u')
 
-    axs[1].plot(vtc, vjc_hat, 'g', linewidth=3)
+    axs[1].plot(vtc, vjc_hat, color, linewidth=3)
     axs[1].grid(True)
     axs[1].set_ylabel('u_hat')
     
-
-
-
 
 
 def plot_ii_continuo(fig, vt, vu, vu_hat, vtc, vuc, vuc_hat, title):
@@ -133,8 +132,9 @@ def plot_v_continuo(fig, vt, vxi, vtc, vxic, title):
 
 # Plots no tempo discreto
 
-def plot_i_discreto(fig, vt, vj, vj_hat, title):
-    pass
+def plot_i_discreto(fig, vt, vj, vj_hat, mi, mi_n, h, title, color= 'om'):
+    plot_i_continuo(fig, vt, vj, vj_hat, mi, mi_n, h, title, color)
+
 
 def plot_ii_discreto(fig, vt, vu, vu_hat, title):
 
@@ -268,35 +268,39 @@ def matrizes_aumentadas(A, B, C):
 
 def main():
 
-    a = 1
-    b = 1.5
+    a = 0
+    b = 2
+    c = 5
     mi = 1
 
-    an = 1
-    bn = 1.5
+    an = 0
+    bn = 2
+    cn = 5
     mi_n = 1
 
-    Acn = np.array([[0, 1], [an/mi_n, (an*mi_n - 1)/mi_n]])
-    Bcn = np.array([[0], [-an*bn/mi_n]])
-    Ccn = np.array([[1, 0]])
-    sysc = lti(Acn, Bcn, Ccn, 0)
-
+    
     # Planta
     Ac = np.array([[0, 1], [a/mi, (a*mi - 1)/mi]])
-    Bc = np.array([[0], [-a*b/mi]])
+    Bc = np.array([[0], [c*b/mi]])
     Cc = np.array([[1, 0]])
     sysc = lti(Ac, Bc, Cc, 0)
+
+    # Matrizes para o Observador
+    Acn = np.array([[0, 1], [an/mi_n, (an*mi_n - 1)/mi_n]])
+    Bcn = np.array([[0], [cn*bn/mi_n]])
+    Ccn = np.array([[1, 0]])
+    sysc = lti(Acn, Bcn, Ccn, 0)
+    
+    
+    ##### Discretização #####
     intstep = 1e-3
     hc = intstep
-
-    ##### Discretização #####
-    h = 0.1
+    h = 0.005
     substeps = int(h / hc)
-    TypeDiscretization = 'ZOH'
 
+    TypeDiscretization = 'ZOH'
     A, B, C = discretization(TypeDiscretization, Ac, Bc, Cc, h)
     An, Bn, Cn = discretization(TypeDiscretization, Acn, Bcn, Ccn, h)
-
 
     print("Ac =\n", Ac)
     print("A =\n", A)
@@ -306,27 +310,40 @@ def main():
     print("eig(A) =", np.linalg.eig(A))
     print("eig(Ac) =", np.linalg.eig(Ac))
 
+
+    # Pertubação
+    vtc = np.linspace(0, 10, int(10/hc))
+    d_cos_c = 0.3*np.cos(vtc)
+    vt = np.linspace(0, 10, int(10/h))
+    d_cos = 0.3*np.cos(vt)
+
+
     ##### Controlador Ação Integral #####
-    ym = -10
+    vtc = np.linspace(0, 10, int(10/hc))
+    ym_sin_c = 2*np.sin(3*vtc)
+    vt = np.linspace(0, 10, int(10/h))
+    ym_sin = 2*np.sin(3*vt)
+
 
     # Exibir matrizes augmentadas discretas
     Aa, Ba, Bm, Ca = matrizes_aumentadas(A, B, C)
     # Exibir matrizes augmentadas discretas nominais
-    Aan, Ban, Bm, Can = matrizes_aumentadas(An, Bn, Cn)
+    Aan, Ban, Bmn, Can = matrizes_aumentadas(An, Bn, Cn)
 
     # Exibir a matriz aumentada contínua
     Aac, Bac, Bmc, Cac = matrizes_aumentadas(Ac, Bc, Cc)
     # Exibir a matriz aumentada contínuas nominais
-    Aacn, Bacn, Bmc, Cacn = matrizes_aumentadas(Acn, Bcn, Ccn)
+    Aacn, Bacn, Bmcn, Cacn = matrizes_aumentadas(Acn, Bcn, Ccn)
 
+    tau = 5
 
-    tau = 3
-
-    Pc = np.array([-tau, -0.411871*tau, -12])
+    #Pc = np.array([-tau, -0.411871*tau, -12])
+    Pc = np.array([-tau, -(tau + 1), -50])
     Kac = place_poles(Aac, Bac, Pc).gain_matrix 
     Kc = np.expand_dims(Kac[0][:len(A)], axis=0)
     kic = -Kac[0][-1]
 
+    # Nominais
     Kacn = place_poles(Aacn, Bacn, Pc).gain_matrix 
     Kcn = np.expand_dims(Kacn[0][:len(A)], axis=0)
     kicn = -Kacn[0][-1]
@@ -334,8 +351,14 @@ def main():
     print("Aac - Bac*Kac =\n", Aac - Bac @ Kac)
     print("eig(Aac - Bac*Kac) =", np.linalg.eig(Aac - Bac*Kac))
 
+    print("Kc =\n", Kc)
+    print("Kac =\n", Kac)
 
-    P = np.array([math.exp(Pc[0]*h), math.exp(Pc[1]*h), math.exp(Pc[2]*h)])
+
+    #P = np.array([math.exp(Pc[0]*h), math.exp(Pc[1]*h), math.exp(Pc[2]*h)])
+    P = np.array([-0.4, 0.5, 0.55])
+    print("P =", P)
+    print("Pc =", Pc)
     Ka = place_poles(Aa, Ba, P).gain_matrix
     K = np.expand_dims(Ka[0][:len(A)], axis=0)
     ki = -Ka[0][-1]
@@ -344,15 +367,16 @@ def main():
     Kn = np.expand_dims(Kan[0][:len(A)], axis=0)
     kin = -Kan[0][-1]
 
+    print("K =\n", K)
+    print("Ka =\n", Ka)
+
+    print("Aa - Ba*Ka =\n", Aa - Ba @ Ka)
+    print("eig(Aa - Ba*Ka) =", np.linalg.eig(Aa - Ba*Ka))
+
 
     ##### Observador #####
     P_observer = np.array([-0.001, 0.005])
     Pc_observer = P_observer
-
-    # Projeto do observador de estados para o sistema contínuo
-    Lc = place_poles(Ac.T, Cc.T, Pc_observer).gain_matrix.T
-    # Projeto do observador de estados para o sistema discreto
-    L = place_poles(A.T, C.T, P_observer).gain_matrix.T
 
     # Projeto do observador de estados para o sistema contínuo NOMINAL          (CONFERIR)
     Lcn = place_poles(Acn.T, Ccn.T, Pc_observer).gain_matrix.T
@@ -376,16 +400,16 @@ def main():
 
     ##### Simulação #####
     # Contínuo
-    xc = np.array([0.5, 0.5]).reshape(-1, 1)
-    xic = 0.5       # aleatório
-    yc = 0.3        # aleatório
-    yc_hat = 0.8    # aleatório
+    xc = np.array([0, 0]).reshape(-1, 1)
+    xic = 0       
+    yc = 10        
+    yc_hat = 10    
     yhc = yc
     yhc_hat = yc_hat
     xhc = xc
     xihc = xic
 
-    xc_hat = np.array([0.8, 0.8]).reshape(-1, 1) # Inicialização do estado estimado
+    xc_hat = np.array([0, 0]).reshape(-1, 1) # Inicialização do estado estimado
     xhc_hat = xc_hat
 
     # Discreto
@@ -397,22 +421,16 @@ def main():
     tc = 0
     t = tc
 
-
+    i = -1
+    o = -1
     while t < 10:
-        uhc = -K @ xhc + kic*xic
-        uhc_hat = -K @ xhc_hat + kic*xic
+        i += 1
+        uhc = -Kc @ xhc + kic*xic + d_cos_c[i]
+        uhc_hat = -Kcn @ xhc_hat + kicn*xic + d_cos_c[i]
 
-        u = -K @ x + ki*xi
-        u_hat = -K @ x_hat + ki*xi
+        u = -K @ x + ki*xi + d_cos[i]
+        u_hat = -Kn @ x_hat + kin*xi + d_cos[i]
 
-        # uhc, uhc_hat, u, u_hat NOMINAIS
-
-        uhcn = -Kn @ xhc + kicn*xic
-        uhcn_hat = -Kn @ xhc_hat + kicn*xic
-
-        un = -Kn @ x + kin*xi
-        un_hat = -Kn @ x_hat + kin*xi
-        
         ## Logs
         # Log pontos discretos do contínuo
         vthc.append(tc)
@@ -420,8 +438,6 @@ def main():
         vxhc.append(xhc.flatten())  # Convertendo para um vetor 1D
         vxihc.append(xihc) 
         vyhc.append(yhc)
-        vuhcn.append(uhcn.item())  # vetor uhc NOMINAL
-
 
         # Log pontos discretos do discreto
         vt.append(t)
@@ -429,57 +445,46 @@ def main():
         vx.append(x.flatten()) 
         vxi.append(xi) 
         vy.append(y)
-        vun.append(un.item())   # vetor u NOMINAL  
-
 
         # Log pontos discretos do contínuo com observador
         vuhc_hat.append(uhc_hat.item())  
         vxhc_hat.append(xhc_hat.flatten())  
         vyhc_hat.append(yhc_hat) 
-        vuhcn_hat.append(uhcn_hat.item())   # vetor uhc_hat NOMINAL  
-
 
         # Log pontos discretos do discreto com observador
         vu_hat.append(u_hat.item())  
         vx_hat.append(x_hat.flatten()) 
         vy_hat.append(y_hat) 
-        vun_hat.append(un_hat.item())   # vetor u_hat NOMINAL
 
         #### Próximo estado ####
 
         ### 1 - MODO CONTÍNUO ###
         uc = uhc  # ZOH
         uc_hat = uhc_hat
-        
-        ucn = uhcn  # ZOH   # NOMINAL
-        ucn_hat = uhcn_hat  #NOMINAL
 
         for _ in range(substeps):
+            o += 1
             # Log pontos contínuos
             vtc.append(tc)
             vuc.append(uc.item())  # Convertendo para um valor escalar
             vxc.append(xc.flatten())  # Convertendo para um vetor 1D
             vxic.append(xic)  
             vyc.append(yc)  
-            vucn.append(ucn.item())  # vetor uc NOMINAL
-
 
             # Com observador
             vuc_hat.append(uc_hat.item()) 
             vxc_hat.append(xc_hat.flatten())
             vyc_hat.append(yc_hat)  
-            vucn_hat.append(ucn_hat.item()) 
-
 
             # Integração
             xc = xc + hc * continuous_dynamics(xc, uc, Ac, Bc)
             
             # Atualizando o observador
             yc = (Cc @ xc)[0][0]
-            xc_hat = xc_hat + hc * continuous_dynamics(xc_hat, uc_hat, Ac, Bc) + hc * Lc @ (yc - Cc @ xc_hat)
-            yc_hat = (Cc @ xc_hat)[0][0]
+            xc_hat = xc_hat + hc * continuous_dynamics(xc_hat, uc_hat, Acn, Bcn) + hc * Lcn @ (yc - Ccn @ xc_hat)
+            yc_hat = (Ccn @ xc_hat)[0][0]
 
-            xic = xic + hc*(ym - yc)
+            xic = xic + hc*(ym_sin_c[o] - yc)
             
             tc += hc
 
@@ -494,11 +499,11 @@ def main():
         # Atualizando o estado real
         x = discrete_dynamics(x, u, A, B)
         y = (C @ x)[0][0]
-        xi = xi + h*(ym - y)
+        xi = xi + h*(ym_sin[i] - y)
         
         # Atualizando o observador
-        x_hat = A @ x_hat + B @ u + L @ (y - C @ x_hat)
-        y_hat = (C @ x_hat)[0][0]
+        x_hat = An @ x_hat + Bn @ u + Ln @ (y - Cn @ x_hat)
+        y_hat = (Cn @ x_hat)[0][0]
         t += h
 
     # Convertendo listas para arrays numpy para plotagem
@@ -542,6 +547,16 @@ def main():
     plot_v_continuo(fig5, vthc, vxihc, vtc, vxic, title)
 
     #Discreto
+
+    # Plot (i)
+    fig6 = plt.figure(6, figsize=(5, 6))
+    title = "Entrada u discreta"
+
+
+    print("vu_hat =", vu_hat)
+    print("vu =", vu)
+
+    plot_i_discreto(fig6, vt, vu, vu_hat, mi, mi_n, h, title, 'om')
 
     # Plot (ii)
     fig7 = plt.figure(7, figsize=(5, 6))
